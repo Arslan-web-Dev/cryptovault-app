@@ -1,0 +1,278 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink, Router } from '@angular/router';
+import { LucideAngularModule, Wallet, TrendingUp, ArrowUpRight, ArrowDownRight, Bell, Settings, LogOut, Shield, DollarSign, Activity } from 'lucide-angular';
+import { AuthService } from '../../core/services/auth.service';
+
+@Component({
+  selector: 'app-dashboard',
+  standalone: true,
+  imports: [CommonModule, RouterLink, LucideAngularModule],
+  template: `
+    <div class="min-h-screen bg-slate-900">
+      <!-- Navigation Header -->
+      <nav class="bg-slate-800/50 backdrop-blur border-b border-slate-700/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between items-center h-16">
+            <div class="flex items-center space-x-8">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <lucide-icon [name]="shield" class="w-5 h-5 text-white"></lucide-icon>
+                </div>
+                <span class="text-xl font-bold text-white">CryptoVault Pro</span>
+              </div>
+              
+              <div class="hidden md:flex space-x-6">
+                <a routerLink="/dashboard" class="text-blue-400 font-medium">Dashboard</a>
+                <a routerLink="/wallet" class="text-gray-300 hover:text-white transition">Wallet</a>
+                <a routerLink="/market" class="text-gray-300 hover:text-white transition">Market</a>
+                <a routerLink="/portfolio" class="text-gray-300 hover:text-white transition">Portfolio</a>
+              </div>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+              <button class="relative p-2 text-gray-300 hover:text-white transition">
+                <lucide-icon [name]="bell" class="w-5 h-5"></lucide-icon>
+                <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              </button>
+              <button class="p-2 text-gray-300 hover:text-white transition">
+                <lucide-icon [name]="settings" class="w-5 h-5"></lucide-icon>
+              </button>
+              <button (click)="logout()" class="p-2 text-gray-300 hover:text-white transition">
+                <lucide-icon [name]="logOut" class="w-5 h-5"></lucide-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Main Content -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Section -->
+        <div class="mb-8">
+          <h1 class="text-3xl font-bold text-white mb-2">Welcome back, {{ currentUser?.full_name || 'User' }}!</h1>
+          <p class="text-gray-400">Here's an overview of your crypto portfolio</p>
+        </div>
+
+        <!-- Portfolio Value Card -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 mb-8">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-blue-100 text-sm mb-2">Total Portfolio Value</p>
+              <h2 class="text-4xl font-bold text-white mb-2">${{ portfolioValue.toLocaleString() }}</h2>
+              <div class="flex items-center space-x-2">
+                @if (portfolioChange >= 0) {
+                  <lucide-icon [name]="arrowUpRight" class="w-5 h-5 text-green-300"></lucide-icon>
+                  <span class="text-green-300 font-medium">+${Math.abs(portfolioChange).toLocaleString()} ({{ portfolioChangePercent }}%)</span>
+                } @else {
+                  <lucide-icon [name]="arrowDownRight" class="w-5 h-5 text-red-300"></lucide-icon>
+                  <span class="text-red-300 font-medium">-${Math.abs(portfolioChange).toLocaleString()} ({{ portfolioChangePercent }}%)</span>
+                }
+                <span class="text-blue-100 text-sm">24h</span>
+              </div>
+            </div>
+            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+              <lucide-icon [name]="wallet" class="w-8 h-8 text-white"></lucide-icon>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div class="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <lucide-icon [name]="dollarSign" class="w-8 h-8 text-green-400"></lucide-icon>
+              <span class="text-green-400 text-sm font-medium">+12.5%</span>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-1">${{ totalProfit.toLocaleString() }}</h3>
+            <p class="text-gray-400 text-sm">Total Profit</p>
+          </div>
+          
+          <div class="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <lucide-icon [name]="activity" class="w-8 h-8 text-blue-400"></lucide-icon>
+              <span class="text-blue-400 text-sm font-medium">Active</span>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-1">{{ walletCount }}</h3>
+            <p class="text-gray-400 text-sm">Active Wallets</p>
+          </div>
+          
+          <div class="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <lucide-icon [name]="trendingUp" class="w-8 h-8 text-purple-400"></lucide-icon>
+              <span class="text-purple-400 text-sm font-medium">+5.2%</span>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-1">{{ transactionCount }}</h3>
+            <p class="text-gray-400 text-sm">Transactions</p>
+          </div>
+          
+          <div class="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <lucide-icon [name]="shield" class="w-8 h-8 text-orange-400"></lucide-icon>
+              <span class="text-orange-400 text-sm font-medium">{{ kycLevel }}</span>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-1">KYC</h3>
+            <p class="text-gray-400 text-sm">Verification Level</p>
+          </div>
+        </div>
+
+        <!-- Portfolio Allocation & Recent Transactions -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Portfolio Allocation -->
+          <div class="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-xl p-6">
+            <h3 class="text-xl font-semibold text-white mb-6">Portfolio Allocation</h3>
+            <div class="space-y-4">
+              @for (allocation of portfolioAllocation; track allocation.coin) {
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center" [style.background-color]="allocation.color">
+                      <span class="text-white font-bold text-sm">{{ allocation.coin.charAt(0) }}</span>
+                    </div>
+                    <div>
+                      <p class="text-white font-medium">{{ allocation.coin }}</p>
+                      <p class="text-gray-400 text-sm">{{ allocation.amount }} {{ allocation.coin }}</p>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-white font-medium">${{ allocation.value.toLocaleString() }}</p>
+                    <p class="text-gray-400 text-sm">{{ allocation.percentage }}%</p>
+                  </div>
+                </div>
+              }
+            </div>
+            
+            <div class="mt-6 pt-6 border-t border-slate-700/50">
+              <div class="flex items-center justify-between">
+                <span class="text-gray-400">Total Value</span>
+                <span class="text-white font-semibold">${{ portfolioValue.toLocaleString() }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Transactions -->
+          <div class="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-xl p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-xl font-semibold text-white">Recent Transactions</h3>
+              <a routerLink="/wallet" class="text-blue-400 hover:text-blue-300 text-sm transition">View All</a>
+            </div>
+            
+            @if (recentTransactions.length === 0) {
+              <div class="text-center py-8">
+                <lucide-icon [name]="activity" class="w-12 h-12 text-gray-600 mx-auto mb-4"></lucide-icon>
+                <p class="text-gray-400">No transactions yet</p>
+                <a routerLink="/wallet" class="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-block transition">
+                  Make your first transaction
+                </a>
+              </div>
+            } @else {
+              <div class="space-y-4">
+                @for (transaction of recentTransactions; track transaction.id) {
+                  <div class="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-10 h-10 rounded-full flex items-center justify-center"
+                           [class.bg-green-500/20]="transaction.type === 'receive'"
+                           [class.bg-red-500/20]="transaction.type === 'send'"
+                           [class.bg-blue-500/20]="transaction.type === 'swap'">
+                        <lucide-icon 
+                          [name]="transaction.type === 'receive' ? arrowUpRight : transaction.type === 'send' ? arrowDownRight : activity"
+                          [class]="transaction.type === 'receive' ? 'text-green-400' : transaction.type === 'send' ? 'text-red-400' : 'text-blue-400'"
+                          class="w-5 h-5">
+                        </lucide-icon>
+                      </div>
+                      <div>
+                        <p class="text-white font-medium capitalize">{{ transaction.type }} {{ transaction.coin }}</p>
+                        <p class="text-gray-400 text-sm">{{ transaction.date }}</p>
+                      </div>
+                    </div>
+                    <div class="text-right">
+                      <p class="text-white font-medium" 
+                         [class.text-green-400]="transaction.type === 'receive'"
+                         [class.text-red-400]="transaction.type === 'send'">
+                        {{ transaction.type === 'receive' ? '+' : '-' }}${{ transaction.amount.toLocaleString() }}
+                      </p>
+                      <p class="text-gray-400 text-sm">{{ transaction.status }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-8 bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-xl p-6">
+          <h3 class="text-xl font-semibold text-white mb-6">Quick Actions</h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <button class="bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/50 text-blue-400 py-3 px-4 rounded-lg transition flex items-center justify-center space-x-2">
+              <lucide-icon [name]="arrowUpRight" class="w-5 h-5"></lucide-icon>
+              <span>Send</span>
+            </button>
+            <button class="bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 text-green-400 py-3 px-4 rounded-lg transition flex items-center justify-center space-x-2">
+              <lucide-icon [name]="arrowDownRight" class="w-5 h-5"></lucide-icon>
+              <span>Receive</span>
+            </button>
+            <button class="bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 text-purple-400 py-3 px-4 rounded-lg transition flex items-center justify-center space-x-2">
+              <lucide-icon [name]="activity" class="w-5 h-5"></lucide-icon>
+              <span>Swap</span>
+            </button>
+            <button class="bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/50 text-orange-400 py-3 px-4 rounded-lg transition flex items-center justify-center space-x-2">
+              <lucide-icon [name]="trendingUp" class="w-5 h-5"></lucide-icon>
+              <span>Buy</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+  styles: []
+})
+export class DashboardComponent implements OnInit {
+  currentUser: any = null;
+  portfolioValue = 12550.00;
+  portfolioChange = 550.00;
+  portfolioChangePercent = '4.58';
+  totalProfit = 1250.00;
+  walletCount = 3;
+  transactionCount = 24;
+  kycLevel = 'Level 1';
+  
+  portfolioAllocation = [
+    { coin: 'BTC', amount: '0.15', value: 6323.45, percentage: '50.4', color: '#f7931a' },
+    { coin: 'ETH', amount: '2.5', value: 5586.40, percentage: '44.5', color: '#627eea' },
+    { coin: 'SOL', amount: '10', value: 956.70, percentage: '7.6', color: '#00d4aa' },
+    { coin: 'USDT', amount: '183.45', value: 183.45, percentage: '1.5', color: '#26a17b' }
+  ];
+  
+  recentTransactions = [
+    { id: 1, type: 'receive', coin: 'BTC', amount: 0.025, date: '2 hours ago', status: 'Completed' },
+    { id: 2, type: 'send', coin: 'ETH', amount: 0.5, date: '1 day ago', status: 'Completed' },
+    { id: 3, type: 'swap', coin: 'SOL', amount: 5, date: '2 days ago', status: 'Completed' },
+    { id: 4, type: 'receive', coin: 'USDT', amount: 100, date: '3 days ago', status: 'Completed' }
+  ];
+
+  shield = Shield;
+  wallet = Wallet;
+  trendingUp = TrendingUp;
+  arrowUpRight = ArrowUpRight;
+  arrowDownRight = ArrowDownRight;
+  bell = Bell;
+  settings = Settings;
+  logOut = LogOut;
+  dollarSign = DollarSign;
+  activity = Activity;
+
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+    });
+  }
+
+  logout(): void {
+    this.authService.logout();
+  }
+}

@@ -1,0 +1,587 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+}
+
+enum KycLevel {
+  LEVEL_0
+  LEVEL_1
+  LEVEL_2
+}
+
+enum CoinType {
+  BTC
+  ETH
+  SOL
+  USDT
+}
+
+enum TransactionType {
+  SEND
+  RECEIVE
+  SWAP
+  BUY
+  SELL
+  STAKE
+  UNSTAKE
+}
+
+enum TransactionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum NotificationType {
+  TRANSACTION
+  SECURITY
+  PRICE_ALERT
+  SYSTEM
+}
+
+enum KycDocumentType {
+  ID_CARD
+  PASSPORT
+  DRIVERS_LICENSE
+  ADDRESS_PROOF
+  SELFIE
+}
+
+enum KycStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum StakingStatus {
+  ACTIVE
+  COMPLETED
+  WITHDRAWN
+}
+
+enum ReferralStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+}
+
+// ============================================
+// USERS TABLE
+// ============================================
+
+model User {
+  id                String   @id @default(uuid()) @db.Uuid
+  email             String   @unique
+  password_hash     String
+  full_name         String
+  phone             String?
+  country           String?
+  timezone          String   @default("UTC")
+  
+  // Verification & Security
+  is_email_verified Boolean  @default(false)
+  email_verify_token String?
+  email_verify_expires DateTime?
+  
+  is_2fa_enabled    Boolean  @default(false)
+  twofa_secret      String?
+  twofa_backup_codes String[]
+  
+  // KYC & Status
+  kyc_level         KycLevel @default(LEVEL_0)
+  status            UserStatus @default(ACTIVE)
+  role              UserRole @default(USER)
+  
+  // Metadata
+  last_login        DateTime?
+  failed_login_attempts Int @default(0)
+  locked_until      DateTime?
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  
+  // Relations
+  wallets           Wallet[]
+  transactions      Transaction[]
+  sessions          Session[]
+  activity_logs     ActivityLog[]
+  api_keys          ApiKey[]
+  staking_positions StakingPosition[]
+  kyc_submissions   KycSubmission[]
+  notifications     Notification[]
+  
+  // Referral relations
+  referrals_made    Referral[] @relation("Referrer")
+  referral_received Referral?  @relation("Referred")
+  
+  @@index([email])
+  @@index([status])
+  @@index([kyc_level])
+  @@index([created_at])
+  @@map("users")
+}
+
+// ============================================
+// WALLETS TABLE
+// ============================================
+
+model Wallet {
+  id                    String   @id @default(uuid()) @db.Uuid
+  user_id               String   @db.Uuid
+  wallet_address        String   @unique
+  coin_type             CoinType
+  
+  // Security
+  private_key_encrypted String
+  
+  // Balance
+  balance               Decimal  @default(0) @db.Decimal(20, 8)
+  
+  // Settings
+  wallet_name           String?
+  is_default            Boolean  @default(false)
+  is_active             Boolean  @default(true)
+  
+  // Whitelist
+  whitelist_enabled     Boolean  @default(false)
+  
+  // Metadata
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+  
+  // Relations
+  user                  User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  transactions          Transaction[]
+  
+  // Whitelisted addresses
+  whitelisted_addresses WhitelistedAddress[]
+  
+  @@index([user_id])
+  @@index([coin_type])
+  @@index([wallet_address])
+  @@map("wallets")
+}
+
+model WhitelistedAddress {
+  id          String   @id @default(uuid()) @db.Uuid
+  wallet_id   String   @db.Uuid
+  address     String
+  label       String?
+  created_at  DateTime @default(now())
+  
+  wallet      Wallet   @relation(fields: [wallet_id], references: [id], onDelete: Cascade)
+  
+  @@unique([wallet_id, address])
+  @@map("whitelisted_addresses")
+}
+
+// ============================================
+// TRANSACTIONS TABLE
+// ============================================
+
+model Transaction {
+  id                String   @id @default(uuid()) @db.Uuid
+  transaction_hash  String?  @unique
+  
+  // Relations
+  user_id           String   @db.Uuid
+  wallet_id         String   @db.Uuid
+  
+  // Transaction details
+  type              TransactionType
+  from_address      String
+  to_address        String
+  coin_type         CoinType
+  
+  // Amounts
+  amount            Decimal  @db.Decimal(20, 8)
+  fee               Decimal  @db.Decimal(20, 8)
+  total             Decimal  @db.Decimal(20, 8)
+  
+  // Status
+  status            TransactionStatus @default(PENDING)
+  confirmations     Int      @default(0)
+  
+  // Security
+  risk_score        Int      @default(0)
+  is_flagged        Boolean  @default(false)
+  flag_reason       String?
+  
+  // Blockchain metadata
+  block_number      BigInt?
+  gas_used          BigInt?
+  gas_price         Decimal? @db.Decimal(20, 0)
+  
+  // For swaps
+  swap_from_amount  Decimal? @db.Decimal(20, 8)
+  swap_to_coin      CoinType?
+  swap_rate         Decimal? @db.Decimal(20, 8)
+  
+  // Metadata
+  ip_address        String?
+  device_info       String?
+  note              String?
+  
+  created_at        DateTime @default(now())
+  completed_at      DateTime?
+  
+  // Relations
+  user              User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  wallet            Wallet   @relation(fields: [wallet_id], references: [id])
+  
+  @@index([user_id])
+  @@index([wallet_id])
+  @@index([status])
+  @@index([coin_type])
+  @@index([created_at])
+  @@index([transaction_hash])
+  @@map("transactions")
+}
+
+// ============================================
+// SESSIONS TABLE
+// ============================================
+
+model Session {
+  id            String   @id @default(uuid()) @db.Uuid
+  user_id       String   @db.Uuid
+  
+  // Tokens
+  token         String   @unique
+  refresh_token String   @unique
+  
+  // Device info
+  device        String?  // e.g., "Chrome on Windows"
+  device_type   String?  // desktop, mobile, tablet
+  browser       String?
+  os            String?
+  
+  // Location
+  ip_address    String
+  location      String?  // e.g., "New York, US"
+  
+  // Status
+  is_active     Boolean  @default(true)
+  
+  // Expiration
+  expires_at    DateTime
+  refresh_expires_at DateTime
+  
+  // Metadata
+  last_activity DateTime @default(now())
+  created_at    DateTime @default(now())
+  
+  // Relations
+  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@index([user_id])
+  @@index([token])
+  @@index([refresh_token])
+  @@index([is_active])
+  @@map("sessions")
+}
+
+// ============================================
+// ACTIVITY LOGS TABLE
+// ============================================
+
+model ActivityLog {
+  id            String   @id @default(uuid()) @db.Uuid
+  user_id       String   @db.Uuid
+  
+  // Action details
+  action        String   // e.g., "LOGIN", "WITHDRAWAL", "SETTINGS_CHANGE"
+  category      String   // security, transaction, settings, etc.
+  
+  // Device & Location
+  ip_address    String
+  device        String?
+  location      String?
+  
+  // Additional data
+  details       Json?    // Flexible JSON for action-specific data
+  
+  // Risk assessment
+  risk_level    String   @default("normal") // low, normal, suspicious, high
+  is_suspicious Boolean  @default(false)
+  
+  created_at    DateTime @default(now())
+  
+  // Relations
+  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@index([user_id])
+  @@index([action])
+  @@index([created_at])
+  @@index([risk_level])
+  @@map("activity_logs")
+}
+
+// ============================================
+// API KEYS TABLE
+// ============================================
+
+model ApiKey {
+  id              String   @id @default(uuid()) @db.Uuid
+  user_id         String   @db.Uuid
+  
+  // Key details
+  key_name        String
+  api_key         String   @unique
+  api_secret      String   @unique
+  
+  // Permissions
+  permissions     String[] // ['read', 'trade', 'withdraw', 'webhook']
+  
+  // Security
+  ip_whitelist    String[]
+  
+  // Usage
+  last_used       DateTime?
+  request_count   Int      @default(0)
+  
+  // Status & Expiration
+  expires_at      DateTime?
+  is_active       Boolean  @default(true)
+  revoked_at      DateTime?
+  revoke_reason   String?
+  
+  // Webhook
+  webhook_url     String?
+  webhook_secret  String?
+  webhook_events  String[]
+  
+  created_at      DateTime @default(now())
+  
+  // Relations
+  user            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@index([user_id])
+  @@index([api_key])
+  @@map("api_keys")
+}
+
+// ============================================
+// STAKING POSITIONS TABLE
+// ============================================
+
+model StakingPosition {
+  id              String   @id @default(uuid()) @db.Uuid
+  user_id         String   @db.Uuid
+  
+  // Pool info
+  pool_id         String
+  pool_name       String
+  
+  // Staking details
+  coin_type       CoinType
+  amount          Decimal  @db.Decimal(20, 8)
+  lock_period     Int      // days
+  apy             Decimal  @db.Decimal(5, 2) // e.g., 12.50%
+  
+  // Dates
+  start_date      DateTime @default(now())
+  end_date        DateTime
+  
+  // Rewards
+  rewards_earned  Decimal  @default(0) @db.Decimal(20, 8)
+  last_compound   DateTime?
+  
+  // Status
+  status          StakingStatus @default(ACTIVE)
+  
+  // Early unstake
+  early_unstake_fee Decimal? @db.Decimal(5, 2) // percentage
+  
+  created_at      DateTime @default(now())
+  
+  // Relations
+  user            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@index([user_id])
+  @@index([status])
+  @@index([pool_id])
+  @@map("staking_positions")
+}
+
+// ============================================
+// KYC SUBMISSIONS TABLE
+// ============================================
+
+model KycSubmission {
+  id                String   @id @default(uuid()) @db.Uuid
+  user_id           String   @db.Uuid
+  
+  // Document
+  document_type     KycDocumentType
+  document_url      String
+  document_number   String?  // ID number if extracted
+  
+  // Verification
+  status            KycStatus @default(PENDING)
+  
+  // Review
+  rejection_reason  String?
+  reviewed_by       String?  // admin ID
+  reviewed_at       DateTime?
+  review_notes      String?
+  
+  // Auto-verification
+  verification_score Decimal? @db.Decimal(3, 2) // 0.00 - 1.00
+  
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  
+  // Relations
+  user              User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@index([user_id])
+  @@index([status])
+  @@index([created_at])
+  @@map("kyc_submissions")
+}
+
+// ============================================
+// REFERRALS TABLE
+// ============================================
+
+model Referral {
+  id                String   @id @default(uuid()) @db.Uuid
+  
+  // Relations
+  referrer_id       String   @db.Uuid
+  referred_id       String   @db.Uuid @unique
+  
+  // Commission
+  commission_rate   Decimal  @default(0.1) @db.Decimal(3, 2) // 10%
+  commission_earned Decimal  @default(0) @db.Decimal(20, 8)
+  pending_commission Decimal @default(0) @db.Decimal(20, 8)
+  
+  // Volume tracking
+  total_volume      Decimal  @default(0) @db.Decimal(20, 8)
+  
+  // Status
+  status            ReferralStatus @default(PENDING)
+  
+  // Qualification
+  qualified_at      DateTime? // When referred user completed qualifying action
+  
+  created_at        DateTime @default(now())
+  
+  // Relations
+  referrer          User     @relation("Referrer", fields: [referrer_id], references: [id])
+  referred          User     @relation("Referred", fields: [referred_id], references: [id])
+  
+  @@index([referrer_id])
+  @@index([referred_id])
+  @@index([status])
+  @@map("referrals")
+}
+
+// ============================================
+// NOTIFICATIONS TABLE
+// ============================================
+
+model Notification {
+  id          String   @id @default(uuid()) @db.Uuid
+  user_id     String   @db.Uuid
+  
+  // Content
+  type        NotificationType
+  title       String
+  message     String   @db.Text
+  
+  // Action
+  action_url  String?
+  action_text String?
+  
+  // Read status
+  is_read     Boolean  @default(false)
+  read_at     DateTime?
+  
+  // Priority
+  priority    String   @default("normal") // low, normal, high, urgent
+  
+  // Related entity
+  related_type String? // transaction, wallet, etc.
+  related_id   String?
+  
+  created_at  DateTime @default(now())
+  
+  // Relations
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  @@index([user_id])
+  @@index([is_read])
+  @@index([type])
+  @@index([created_at])
+  @@map("notifications")
+}
+
+// ============================================
+// SYSTEM SETTINGS (for admin)
+// ============================================
+
+model SystemSetting {
+  id          String   @id @default(uuid()) @db.Uuid
+  category    String   // general, fees, security, compliance, etc.
+  key         String   @unique
+  value       Json
+  description String?
+  updated_by  String?  // admin ID
+  updated_at  DateTime @updatedAt
+  created_at  DateTime @default(now())
+  
+  @@index([category])
+  @@map("system_settings")
+}
+
+// ============================================
+// ADMIN ACTIVITY LOG
+// ============================================
+
+model AdminActivity {
+  id          String   @id @default(uuid()) @db.Uuid
+  admin_id    String   @db.Uuid
+  
+  // Action
+  action      String   // e.g., "USER_SUSPEND", "SETTINGS_UPDATE"
+  target_type String?  // user, transaction, setting
+  target_id   String?
+  
+  // Details
+  old_values  Json?
+  new_values  Json?
+  reason      String?
+  
+  // Metadata
+  ip_address  String
+  created_at  DateTime @default(now())
+  
+  @@index([admin_id])
+  @@index([action])
+  @@index([created_at])
+  @@map("admin_activities")
+}
