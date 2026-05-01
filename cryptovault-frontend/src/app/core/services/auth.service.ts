@@ -138,6 +138,8 @@ export class AuthService {
   private getUserFromToken(token: string): User | null {
     try {
       const decoded: any = jwtDecode(token);
+      // The JWT token only contains userId, other user details should be fetched from API
+      // This is a placeholder that will be replaced with actual user data on login
       return {
         id: decoded.userId,
         email: '',

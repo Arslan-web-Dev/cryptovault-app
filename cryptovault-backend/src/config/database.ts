@@ -25,9 +25,13 @@ export const connectDB = async (): Promise<void> => {
     }
   } catch (error) {
     console.error('❌ Database connection failed:', error);
-    process.exit(1);
+    // Don't throw error in development to allow server to start without DB
+    if (process.env['NODE_ENV'] === 'production') {
+      throw error;
+    }
+    console.warn('⚠️ Continuing without database connection (development mode)');
   }
-};
+}
 
 export const disconnectDB = async (): Promise<void> => {
   try {

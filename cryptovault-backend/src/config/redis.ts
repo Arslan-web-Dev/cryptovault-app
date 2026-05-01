@@ -20,11 +20,17 @@ class RedisService {
     this.client.on('connect', () => {
       console.log('✅ Redis connected successfully');
     });
+
+    this.client.on('ready', () => {
+      console.log('✅ Redis ready');
+    });
   }
 
   async connect(): Promise<void> {
     try {
-      await this.client.connect();
+      if (!this.client.status || this.client.status === 'end') {
+        await this.client.connect();
+      }
     } catch (error) {
       console.error('❌ Redis connection failed:', error);
       throw error;
