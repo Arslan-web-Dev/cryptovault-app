@@ -7,9 +7,9 @@ To explore the platform immediately, use the following demo credentials:
 
 | Role | Email | Password |
 |------|-------|----------|
-| **Super Admin** | `[EMAIL_ADDRESS]` | `admin123` |
+| **Super Admin** | `[admain@example.com]` | `admin123` |
 | **Test User** | `user@example.com` | `password123` |
-**main  admain** | `[EMAIL_ADDRESS]` | `Cui@59191` |
+**main  admain** | `[arslan.admain@gamil.com]` | `Cui@59191` |
 
 ---
 
