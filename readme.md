@@ -1,8 +1,70 @@
-﻿# CryptoVault Pro - Complete Documentation
+# CryptoVault Pro - Complete Documentation
 
 ---
 
-# ðŸŽ¨ CryptoVault Pro â€“ Complete Design System
+## 🔑 Demo Access
+To explore the platform immediately, use the following demo credentials:
+
+| Role | Email | Password |
+|------|-------|----------|
+| **Super Admin** | `[EMAIL_ADDRESS]` | `admin123` |
+| **Test User** | `user@example.com` | `password123` |
+**main  admain** | `[EMAIL_ADDRESS]` | `Cui@59191` |
+
+---
+
+## 🏗️ Project Architecture & Structure
+
+The **CryptoVault Pro** ecosystem is built on a robust, scalable micro-architecture using modern full-stack technologies.
+
+### 🔙 Backend (`cryptovault-backend`)
+Built with **Node.js**, **Express**, and **TypeScript**, the backend serves as the core intelligence of the platform.
+- **`src/controllers/`**: Orchestrates request-response cycles, ensuring data is correctly handled and routed.
+- **`src/services/`**: The business logic layer. It handles complex operations, database interactions via **Prisma ORM**, and integrations with third-party APIs.
+- **`src/routes/`**: Defines a clean RESTful API surface for the frontend to consume.
+- **`src/middleware/`**: Implements critical security layers including **JWT Authentication**, role-based access control (RBAC), and request validation.
+- **`src/websocket/`**: Manages real-time data flow for live market tickers and instant transaction notifications.
+- **`prisma/`**: Contains the database schema (`schema.prisma`) and seeding scripts for quick deployment.
+
+### 🎨 Frontend (`cryptovault-frontend`)
+A high-performance Single Page Application (SPA) built with **Angular 19**.
+- **`src/app/core/`**: Houses singleton services, authentication guards, and HTTP interceptors that manage the application's global state.
+- **`src/app/features/`**: Modular architecture where each major functionality (Market, Wallet, Dashboard, Admin) is isolated for better maintainability.
+- **`src/app/shared/`**: Contains reusable UI components, pipes, and directives used across the entire application.
+- **`src/styles/`**: Implements a premium design system using **SCSS** with CSS variables for dynamic theming (Dark/Light modes).
+
+---
+
+## 🚀 Core Functionalities
+
+### 1. 🔐 Secure Authentication System
+- **Advanced Auth**: JWT-based authentication with secure refresh token rotation.
+- **Multi-Factor security**: Integrated 2FA setup via authenticator apps.
+- **RBAC**: Strict role-based access ensuring users only see what they are authorized to.
+
+### 2. 💰 Multi-Chain Crypto Wallet
+- **Asset Management**: Securely store and manage BTC, ETH, SOL, and various ERC-20 tokens.
+- **Transactions**: Seamlessly Send, Receive, and Swap assets with real-time fee calculation.
+- **History**: Comprehensive transaction ledger with explorer links and status tracking.
+
+### 3. 📊 Real-time Market Analytics
+- **Live Data**: Integration with high-fidelity market APIs for real-time price updates.
+- **Interactive Charts**: Professional-grade trading charts with multiple timeframes and technical indicators.
+- **Global Stats**: Market-wide insights including dominance, volume, and Fear & Greed index.
+
+### 4. 📈 Intelligent Portfolio Tracking
+- **Visual Analytics**: Dynamic allocation charts (Donut/Pie) and performance line graphs.
+- **P&L Reporting**: Automatic calculation of daily and total profits/losses.
+- **ROI Tracking**: Detailed metrics on investment performance across all assets.
+
+### 5. 🛠️ Comprehensive Admin Control
+- **User Management**: Tools to monitor user activity, manage KYC levels, and handle account statuses.
+- **System Monitoring**: Real-time health checks for APIs, database, and blockchain nodes.
+- **Transaction Oversight**: Ability to review, flag, and manage system-wide transactions.
+
+---
+
+# 🎨 CryptoVault Pro – Complete Design System
 
 > **Production-Ready Design Specifications** for all 35 pages of the CryptoVault Pro crypto wallet platform.
 
@@ -941,7 +1003,7 @@
 
 ---
 
-## ðŸ“± Responsive Breakpoints
+## 📱 Responsive Breakpoints
 
 | Breakpoint | Width | Adjustments |
 |------------|-------|-------------|
@@ -951,7 +1013,7 @@
 
 ---
 
-## ðŸŽ¯ Interactive Elements
+## 🎯 Interactive Elements
 
 ### Modals
 - Backdrop blur
@@ -989,7 +1051,7 @@
 
 ---
 
-## ðŸŽ¨ Export Checklist
+## 🎨 Export Checklist
 
 - [ ] All 35 pages designed
 - [ ] Responsive layouts (mobile/tablet/desktop)
@@ -1046,82 +1108,82 @@
 
 ---
 
-## ðŸ“¦ Project Structure
+## 📦 Project Structure
 
 ```
 cryptovault-backend/
-â”‚
-â”œâ”€â”€ src/
-â”‚   â”œâ”€â”€ config/
-â”‚   â”‚   â”œâ”€â”€ database.js       # Database connection
-â”‚   â”‚   â”œâ”€â”€ redis.js          # Redis client
-â”‚   â”‚   â”œâ”€â”€ blockchain.js     # Web3 configurations
-â”‚   â”‚   â””â”€â”€ email.js          # SMTP configuration
-â”‚   â”‚
-â”‚   â”œâ”€â”€ controllers/
-â”‚   â”‚   â”œâ”€â”€ auth.controller.js
-â”‚   â”‚   â”œâ”€â”€ wallet.controller.js
-â”‚   â”‚   â”œâ”€â”€ transaction.controller.js
-â”‚   â”‚   â”œâ”€â”€ market.controller.js
-â”‚   â”‚   â”œâ”€â”€ portfolio.controller.js
-â”‚   â”‚   â”œâ”€â”€ staking.controller.js
-â”‚   â”‚   â”œâ”€â”€ admin.controller.js
-â”‚   â”‚   â””â”€â”€ user.controller.js
-â”‚   â”‚
-â”‚   â”œâ”€â”€ services/
-â”‚   â”‚   â”œâ”€â”€ auth.service.js
-â”‚   â”‚   â”œâ”€â”€ wallet.service.js
-â”‚   â”‚   â”œâ”€â”€ blockchain.service.js
-â”‚   â”‚   â”œâ”€â”€ transaction.service.js
-â”‚   â”‚   â”œâ”€â”€ market.service.js
-â”‚   â”‚   â”œâ”€â”€ notification.service.js
-â”‚   â”‚   â”œâ”€â”€ redis.service.js
-â”‚   â”‚   â””â”€â”€ email.service.js
-â”‚   â”‚
-â”‚   â”œâ”€â”€ middleware/
-â”‚   â”‚   â”œâ”€â”€ auth.middleware.js      # JWT verification
-â”‚   â”‚   â”œâ”€â”€ admin.middleware.js     # Admin role check
-â”‚   â”‚   â”œâ”€â”€ rateLimit.middleware.js
-â”‚   â”‚   â”œâ”€â”€ error.middleware.js
-â”‚   â”‚   â”œâ”€â”€ validation.middleware.js
-â”‚   â”‚   â””â”€â”€ upload.middleware.js
-â”‚   â”‚
-â”‚   â”œâ”€â”€ models/  (if using Mongoose) or prisma/schema.prisma
-â”‚   â”‚
-â”‚   â”œâ”€â”€ routes/
-â”‚   â”‚   â”œâ”€â”€ auth.routes.js
-â”‚   â”‚   â”œâ”€â”€ wallet.routes.js
-â”‚   â”‚   â”œâ”€â”€ transaction.routes.js
-â”‚   â”‚   â”œâ”€â”€ market.routes.js
-â”‚   â”‚   â”œâ”€â”€ admin.routes.js
-â”‚   â”‚   â””â”€â”€ index.js
-â”‚   â”‚
-â”‚   â”œâ”€â”€ utils/
-â”‚   â”‚   â”œâ”€â”€ encryption.js     # Private key encryption
-â”‚   â”‚   â”œâ”€â”€ validators.js
-â”‚   â”‚   â”œâ”€â”€ helpers.js
-â”‚   â”‚   â””â”€â”€ logger.js
-â”‚   â”‚
-â”‚   â”œâ”€â”€ websocket/
-â”‚   â”‚   â””â”€â”€ socket.handler.js
-â”‚   â”‚
-â”‚   â””â”€â”€ app.js
-â”‚
-â”œâ”€â”€ prisma/
-â”‚   â”œâ”€â”€ schema.prisma
-â”‚   â””â”€â”€ migrations/
-â”‚
-â”œâ”€â”€ tests/
-â”‚   â”œâ”€â”€ unit/
-â”‚   â””â”€â”€ integration/
-â”‚
-â”œâ”€â”€ uploads/
-â”‚   â””â”€â”€ kyc/
-â”‚
-â”œâ”€â”€ .env
-â”œâ”€â”€ .env.example
-â”œâ”€â”€ package.json
-â””â”€â”€ server.js
+│
+├── src/
+│   ├── config/
+│   │   ├── database.js       # Database connection
+│   │   ├── redis.js          # Redis client
+│   │   ├── blockchain.js     # Web3 configurations
+│   │   └── email.js          # SMTP configuration
+│   │
+│   ├── controllers/
+│   │   ├── auth.controller.js
+│   │   ├── wallet.controller.js
+│   │   ├── transaction.controller.js
+│   │   ├── market.controller.js
+│   │   ├── portfolio.controller.js
+│   │   ├── staking.controller.js
+│   │   ├── admin.controller.js
+│   │   └── user.controller.js
+│   │
+│   ├── services/
+│   │   ├── auth.service.js
+│   │   ├── wallet.service.js
+│   │   ├── blockchain.service.js
+│   │   ├── transaction.service.js
+│   │   ├── market.service.js
+│   │   ├── notification.service.js
+│   │   ├── redis.service.js
+│   │   └── email.service.js
+│   │
+│   ├── middleware/
+│   │   ├── auth.middleware.js      # JWT verification
+│   │   ├── admin.middleware.js     # Admin role check
+│   │   ├── rateLimit.middleware.js
+│   │   ├── error.middleware.js
+│   │   ├── validation.middleware.js
+│   │   └── upload.middleware.js
+│   │
+│   ├── models/  (if using Mongoose) or prisma/schema.prisma
+│   │
+│   ├── routes/
+│   │   ├── auth.routes.js
+│   │   ├── wallet.routes.js
+│   │   ├── transaction.routes.js
+│   │   ├── market.routes.js
+│   │   ├── admin.routes.js
+│   │   └── index.js
+│   │
+│   ├── utils/
+│   │   ├── encryption.js     # Private key encryption
+│   │   ├── validators.js
+│   │   ├── helpers.js
+│   │   └── logger.js
+│   │
+│   ├── websocket/
+│   │   └── socket.handler.js
+│   │
+│   └── app.js
+│
+├── prisma/
+│   ├── schema.prisma
+│   └── migrations/
+│
+├── tests/
+│   ├── unit/
+│   └── integration/
+│
+├── uploads/
+│   └── kyc/
+│
+├── .env
+├── .env.example
+├── package.json
+└── server.js
 ```
 
 ---
@@ -1407,7 +1469,7 @@ module.exports = new BlockchainService();
 
 ---
 
-## ðŸ“§ Email Service
+## 📧 Email Service
 
 ```javascript
 // email.service.js
