@@ -97,6 +97,16 @@ const swaggerOptions = {
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// Root route
+app.get('/', (_req, res) => {
+  res.status(200).json({
+    message: 'Welcome to CryptoVault Pro API',
+    version: '1.0.0',
+    documentation: '/api-docs',
+    status: 'Running'
+  });
+});
+
 // Health check endpoint
 app.get('/health', (_req, res) => {
   res.status(200).json({

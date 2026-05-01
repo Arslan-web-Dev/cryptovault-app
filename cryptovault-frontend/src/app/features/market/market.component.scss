@@ -1,0 +1,82 @@
+.market-layout {
+  padding: 40px 0;
+}
+
+.market-header {
+  margin-bottom: 40px;
+}
+
+.market-title {
+  font-size: 2.25rem;
+  margin-bottom: 8px;
+}
+
+/* Featured Coins */
+.featured-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+.featured-card {
+  padding: 24px;
+  border-radius: 24px;
+  transition: var(--transition);
+  &:hover {
+    transform: scale(1.02);
+    border-color: var(--accent-blue);
+  }
+}
+
+.chart-mini {
+  height: 60px;
+  margin-top: 16px;
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), transparent);
+  border-bottom: 2px solid var(--accent-blue);
+  clip-path: polygon(0 100%, 10% 80%, 20% 90%, 30% 60%, 40% 70%, 50% 40%, 60% 50%, 70% 20%, 80% 30%, 90% 10%, 100% 0, 100% 100%);
+}
+
+.chart-mini.down {
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.1), transparent);
+  border-bottom-color: var(--error);
+  clip-path: polygon(0 0, 10% 20%, 20% 10%, 30% 40%, 40% 30%, 50% 60%, 60% 50%, 70% 80%, 80% 70%, 90% 90%, 100% 100%, 100% 0);
+}
+
+/* Market List */
+.market-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.filter-chip {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: 100px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  &:hover { background: rgba(255, 255, 255, 0.1); }
+  &.active {
+    background: var(--accent-blue);
+    color: #fff;
+    border-color: var(--accent-blue);
+  }
+}
+
+.coin-row {
+  transition: var(--transition);
+  &:hover { background: rgba(255, 255, 255, 0.02); }
+}
+
+.rank-badge {
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 0.85rem;
+}

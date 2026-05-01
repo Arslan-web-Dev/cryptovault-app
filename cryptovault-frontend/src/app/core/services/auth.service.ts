@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
@@ -46,21 +47,26 @@ export class AuthService {
 
   currentUser$ = this.currentUserSubject.asObservable();
   isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
+  private isBrowser: boolean;
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
     this.initializeAuth();
   }
 
   private initializeAuth() {
-    const token = this.getAccessToken();
-    if (token && !this.isTokenExpired(token)) {
-      const user = this.getUserFromToken(token);
-      if (user) {
-        this.currentUserSubject.next(user);
-        this.isAuthenticatedSubject.next(true);
+    if (this.isBrowser) {
+      const token = this.getAccessToken();
+      if (token && !this.isTokenExpired(token)) {
+        const user = this.getUserFromToken(token);
+        if (user) {
+          this.currentUserSubject.next(user);
+          this.isAuthenticatedSubject.next(true);
+        }
       }
     }
   }
@@ -81,7 +87,7 @@ export class AuthService {
 
   logout(): void {
     const refreshToken = this.getRefreshToken();
-    if (refreshToken) {
+    if (refreshToken && this.isBrowser) {
       this.http.post(`${this.API_URL}/logout`, { refresh_token: refreshToken }).subscribe();
     }
     
@@ -109,21 +115,31 @@ export class AuthService {
   }
 
   getAccessToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    if (this.isBrowser) {
+      return localStorage.getItem(this.TOKEN_KEY);
+    }
+    return null;
   }
 
   getRefreshToken(): string | null {
-    return localStorage.getItem(this.REFRESH_TOKEN_KEY);
+    if (this.isBrowser) {
+      return localStorage.getItem(this.REFRESH_TOKEN_KEY);
+    }
+    return null;
   }
 
   private setTokens(accessToken: string, refreshToken: string): void {
-    localStorage.setItem(this.TOKEN_KEY, accessToken);
-    localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
+    if (this.isBrowser) {
+      localStorage.setItem(this.TOKEN_KEY, accessToken);
+      localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
+    }
   }
 
   private clearTokens(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+    if (this.isBrowser) {
+      localStorage.removeItem(this.TOKEN_KEY);
+      localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+    }
   }
 
   private isTokenExpired(token: string): boolean {
@@ -138,8 +154,6 @@ export class AuthService {
   private getUserFromToken(token: string): User | null {
     try {
       const decoded: any = jwtDecode(token);
-      // The JWT token only contains userId, other user details should be fetched from API
-      // This is a placeholder that will be replaced with actual user data on login
       return {
         id: decoded.userId,
         email: '',

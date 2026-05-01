@@ -53,6 +53,11 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    path: 'staking',
+    loadChildren: () => import('./features/staking/staking.routes').then(m => m.STAKING_ROUTES),
+    canActivate: [AuthGuard]
+  },
+  {
     path: '**',
     redirectTo: '',
     pathMatch: 'full'

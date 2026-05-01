@@ -27,102 +27,142 @@ class AuthService {
   private readonly refreshTokenExpiry = process.env['REFRESH_TOKEN_EXPIRY'] || '7d';
 
   async register(data: RegisterData) {
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email: data.email }
-    });
+    try {
+      // Check if user already exists
+      const existingUser = await prisma.user.findUnique({
+        where: { email: data.email }
+      });
 
-    if (existingUser) {
-      throw createError('User with this email already exists', 409);
-    }
-
-    // Hash password
-    const saltRounds = parseInt(process.env['BCRYPT_ROUNDS'] || '12');
-    const passwordHash = await bcrypt.hash(data.password, saltRounds);
-
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        email: data.email,
-        password_hash: passwordHash,
-        full_name: data.fullName,
-        phone: data.phone || null,
-        country: data.country || null,
-        email_verify_token: this.generateEmailToken(),
-        email_verify_expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-      },
-      select: {
-        id: true,
-        email: true,
-        full_name: true,
-        is_email_verified: true,
-        kyc_level: true,
-        created_at: true
+      if (existingUser) {
+        throw createError('User with this email already exists', 409);
       }
-    });
 
-    // TODO: Send verification email
+      // Hash password
+      const saltRounds = parseInt(process.env['BCRYPT_ROUNDS'] || '12');
+      const passwordHash = await bcrypt.hash(data.password, saltRounds);
 
-    return {
-      message: 'Registration successful. Please check your email for verification.',
-      user
-    };
+      // Create user
+      const user = await prisma.user.create({
+        data: {
+          email: data.email,
+          password_hash: passwordHash,
+          full_name: data.fullName,
+          phone: data.phone || null,
+          country: data.country || null,
+          email_verify_token: this.generateEmailToken(),
+          email_verify_expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+        },
+        select: {
+          id: true,
+          email: true,
+          full_name: true,
+          is_email_verified: true,
+          kyc_level: true,
+          created_at: true
+        }
+      });
+
+      // TODO: Send verification email
+
+      return {
+        message: 'Registration successful. Please check your email for verification.',
+        user
+      };
+    } catch (error: any) {
+      if (process.env['NODE_ENV'] === 'development' && (error.code === 'P1001' || error.message?.includes('Can\'t reach database server'))) {
+        console.warn('⚠️ Database unreachable. Returning mock success for registration.');
+        return {
+          message: 'Registration successful (MOCK). Database is currently offline.',
+          user: {
+            id: 'mock-id-' + Date.now(),
+            email: data.email,
+            full_name: data.fullName,
+            is_email_verified: true,
+            kyc_level: 'LEVEL_1',
+            created_at: new Date()
+          }
+        };
+      }
+      throw error;
+    }
   }
 
   async login(data: LoginData) {
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { email: data.email }
-    });
+    try {
+      // Find user
+      const user = await prisma.user.findUnique({
+        where: { email: data.email }
+      });
 
-    if (!user) {
-      throw createError('Invalid email or password', 401);
-    }
-
-    // Check account status
-    if (user.status !== 'ACTIVE') {
-      throw createError('Account is not active', 401);
-    }
-
-    // Check if account is locked
-    if (user.locked_until && user.locked_until > new Date()) {
-      throw createError('Account is temporarily locked. Please try again later.', 423);
-    }
-
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(data.password, user.password_hash);
-    if (!isPasswordValid) {
-      await this.handleFailedLogin(user.id);
-      throw createError('Invalid email or password', 401);
-    }
-
-    // Reset failed attempts on successful login
-    await this.resetFailedAttempts(user.id);
-
-    // Generate tokens
-    const tokens = await this.generateTokenPair(user.id);
-
-    // Create session
-    await this.createSession(user.id, tokens.refreshToken, data.rememberMe);
-
-    // Update last login
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { last_login: new Date() }
-    });
-
-    return {
-      access_token: tokens.accessToken,
-      refresh_token: tokens.refreshToken,
-      expires_in: 900, // 15 minutes
-      user: {
-        id: user.id,
-        email: user.email,
-        full_name: user.full_name,
-        is_2fa_enabled: user.is_2fa_enabled,
-        kyc_level: user.kyc_level
+      if (!user) {
+        throw createError('Invalid email or password', 401);
       }
-    };
+
+      // Check account status
+      if (user.status !== 'ACTIVE') {
+        throw createError('Account is not active', 401);
+      }
+
+      // Check if account is locked
+      if (user.locked_until && user.locked_until > new Date()) {
+        throw createError('Account is temporarily locked. Please try again later.', 423);
+      }
+
+      // Verify password
+      const isPasswordValid = await bcrypt.compare(data.password, user.password_hash);
+      if (!isPasswordValid) {
+        await this.handleFailedLogin(user.id);
+        throw createError('Invalid email or password', 401);
+      }
+
+      // Reset failed attempts on successful login
+      await this.resetFailedAttempts(user.id);
+
+      // Generate tokens
+      const tokens = await this.generateTokenPair(user.id);
+
+      // Create session
+      await this.createSession(user.id, tokens.refreshToken, data.rememberMe);
+
+      // Update last login
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { last_login: new Date() }
+      });
+
+      return {
+        access_token: tokens.accessToken,
+        refresh_token: tokens.refreshToken,
+        expires_in: 900, // 15 minutes
+        user: {
+          id: user.id,
+          email: user.email,
+          full_name: user.full_name,
+          is_2fa_enabled: user.is_2fa_enabled,
+          kyc_level: user.kyc_level
+        }
+      };
+    } catch (error: any) {
+      // Fallback for development if DB is unreachable
+      if (process.env['NODE_ENV'] === 'development' && (error.code === 'P1001' || error.message?.includes('Can\'t reach database server'))) {
+        console.warn('⚠️ Database unreachable. Returning mock user for development.');
+        const mockUserId = 'mock-user-id-' + data.email.split('@')[0];
+        const tokens = await this.generateTokenPair(mockUserId);
+        return {
+          access_token: tokens.accessToken,
+          refresh_token: tokens.refreshToken,
+          expires_in: 900,
+          user: {
+            id: mockUserId,
+            email: data.email,
+            full_name: 'Mock User (' + data.email.split('@')[0] + ')',
+            is_2fa_enabled: false,
+            kyc_level: 'LEVEL_1'
+          }
+        };
+      }
+      throw error;
+    }
   }
 
   async refresh(refreshToken: string) {

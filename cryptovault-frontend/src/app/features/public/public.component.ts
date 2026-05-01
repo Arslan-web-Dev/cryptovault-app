@@ -1,311 +1,192 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { LucideAngularModule, Shield, TrendingUp, Lock, Globe, ChevronRight, Star, ArrowUpRight, ArrowDownRight } from 'lucide-angular';
+import { LucideAngularModule, Shield, TrendingUp, Lock, Globe, Star, ArrowUpRight, ArrowDownRight } from 'lucide-angular';
 
 @Component({
   selector: 'app-public',
   standalone: true,
   imports: [CommonModule, RouterLink, LucideAngularModule],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div class="public-layout">
       <!-- Navigation -->
-      <nav class="fixed top-0 w-full bg-slate-900/80 backdrop-blur-lg border-b border-slate-700/50 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex justify-between items-center h-16">
-            <div class="flex items-center space-x-2">
-              <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                <lucide-icon [name]="shield" class="w-5 h-5 text-white"></lucide-icon>
-              </div>
-              <span class="text-xl font-bold text-white">CryptoVault Pro</span>
+      <nav class="navbar glass">
+        <div class="container navbar-container">
+          <div class="logo">
+            <div class="logo-icon">
+              <lucide-icon [name]="shield"></lucide-icon>
             </div>
-            <div class="hidden md:flex items-center space-x-8">
-              <a href="#features" class="text-gray-300 hover:text-white transition">Features</a>
-              <a href="#security" class="text-gray-300 hover:text-white transition">Security</a>
-              <a href="#pricing" class="text-gray-300 hover:text-white transition">Pricing</a>
-              <a href="#about" class="text-gray-300 hover:text-white transition">About</a>
-            </div>
-            <div class="flex items-center space-x-4">
-              <a routerLink="/auth/login" class="text-gray-300 hover:text-white transition">Login</a>
-              <a routerLink="/auth/register" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition">
-                Get Started
-              </a>
-            </div>
+            <span>CryptoVault Pro</span>
+          </div>
+          
+          <div class="nav-links">
+            <a href="#features" class="nav-link">Features</a>
+            <a href="#market" class="nav-link">Market</a>
+            <a href="#security" class="nav-link">Security</a>
+            <a href="#about" class="nav-link">About</a>
+          </div>
+
+          <div class="nav-actions">
+            <a routerLink="/auth/login" class="btn btn-ghost">Login</a>
+            <a routerLink="/auth/register" class="btn btn-primary">Get Started</a>
           </div>
         </div>
       </nav>
 
       <!-- Hero Section -->
-      <section class="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-7xl mx-auto text-center">
-          <h1 class="text-5xl md:text-6xl font-bold text-white mb-6">
-            Secure Crypto Management
-            <span class="block text-blue-400">Made Simple</span>
-          </h1>
-          <p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-            The most trusted crypto wallet platform with bank-level security, 
-            instant transactions, and portfolio analytics all in one place.
-          </p>
-          <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <a routerLink="/auth/register" 
-               class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold transition transform hover:scale-105">
-              Get Started Free
-            </a>
-            <a href="#features" 
-               class="border border-gray-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-800 transition">
-              Learn More
-            </a>
-          </div>
-          
-          <!-- Trust Badges -->
-          <div class="flex items-center justify-center space-x-8 text-gray-400">
-            <div class="flex items-center space-x-2">
-              <lucide-icon [name]="shield" class="w-5 h-5"></lucide-icon>
-              <span>Bank-Level Security</span>
-            </div>
-            <div class="flex items-center space-x-2">
-              <lucide-icon [name]="star" class="w-5 h-5"></lucide-icon>
-              <span>4.9/5 Rating</span>
-            </div>
-            <div class="flex items-center space-x-2">
-              <lucide-icon [name]="globe" class="w-5 h-5"></lucide-icon>
-              <span>150+ Countries</span>
-            </div>
-          </div>
+      <section class="hero container animate-fade-in">
+        <div class="hero-badge">
+          <lucide-icon [name]="star" size="14"></lucide-icon>
+          <span>Trusted by 10M+ users worldwide</span>
+        </div>
+        <h1 class="hero-title">
+          Secure Crypto <br />
+          <span class="gradient-text">Management</span>
+        </h1>
+        <p class="hero-subtitle">
+          The next-generation wallet platform. Trade, store, and grow your crypto 
+          assets with institutional-grade security and ease.
+        </p>
+        <div class="hero-actions">
+          <a routerLink="/auth/register" class="btn btn-primary btn-lg">Start Building Portfolio</a>
+          <a href="#features" class="btn btn-ghost btn-lg">Explore Features</a>
         </div>
       </section>
 
-      <!-- Live Market Ticker -->
-      <section class="bg-slate-800/50 backdrop-blur border-y border-slate-700/50 py-4">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex items-center space-x-8 overflow-x-auto">
-            <div class="flex items-center space-x-2 whitespace-nowrap">
-              <span class="text-gray-400">BTC</span>
-              <span class="text-white font-semibold">$42,156</span>
-              <lucide-icon [name]="arrowUpRight" class="w-4 h-4 text-green-400"></lucide-icon>
-              <span class="text-green-400 text-sm">+2.5%</span>
+      <!-- Market Ticker -->
+      <section id="market" class="market-ticker">
+        <div class="ticker-wrapper">
+          @for (coin of coins; track coin.symbol) {
+            <div class="ticker-item">
+              <span class="coin-symbol">{{ coin.symbol }}</span>
+              <span class="coin-price">{{ coin.price }}</span>
+              <span class="coin-change" [class.up]="coin.up" [class.down]="!coin.up">
+                <lucide-icon [name]="coin.up ? arrowUpRight : arrowDownRight" size="16"></lucide-icon>
+                {{ coin.change }}
+              </span>
             </div>
-            <div class="flex items-center space-x-2 whitespace-nowrap">
-              <span class="text-gray-400">ETH</span>
-              <span class="text-white font-semibold">$2,234</span>
-              <lucide-icon [name]="arrowDownRight" class="w-4 h-4 text-red-400"></lucide-icon>
-              <span class="text-red-400 text-sm">-1.2%</span>
+          }
+          <!-- Repeat for smooth scroll -->
+          @for (coin of coins; track coin.symbol + '-copy') {
+            <div class="ticker-item">
+              <span class="coin-symbol">{{ coin.symbol }}</span>
+              <span class="coin-price">{{ coin.price }}</span>
+              <span class="coin-change" [class.up]="coin.up" [class.down]="!coin.up">
+                <lucide-icon [name]="coin.up ? arrowUpRight : arrowDownRight" size="16"></lucide-icon>
+                {{ coin.change }}
+              </span>
             </div>
-            <div class="flex items-center space-x-2 whitespace-nowrap">
-              <span class="text-gray-400">SOL</span>
-              <span class="text-white font-semibold">$95.67</span>
-              <lucide-icon [name]="arrowUpRight" class="w-4 h-4 text-green-400"></lucide-icon>
-              <span class="text-green-400 text-sm">+5.1%</span>
-            </div>
-            <div class="flex items-center space-x-2 whitespace-nowrap">
-              <span class="text-gray-400">USDT</span>
-              <span class="text-white font-semibold">$1.00</span>
-              <lucide-icon [name]="arrowUpRight" class="w-4 h-4 text-green-400"></lucide-icon>
-              <span class="text-green-400 text-sm">+0.01%</span>
-            </div>
-          </div>
+          }
         </div>
       </section>
 
       <!-- Features Grid -->
-      <section id="features" class="py-20 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-7xl mx-auto">
-          <div class="text-center mb-16">
-            <h2 class="text-4xl font-bold text-white mb-4">Everything You Need</h2>
-            <p class="text-xl text-gray-300">Powerful features for modern crypto management</p>
-          </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div class="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-xl p-6 hover:bg-slate-800/70 transition">
-              <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4">
-                <lucide-icon [name]="shield" class="w-6 h-6 text-blue-400"></lucide-icon>
-              </div>
-              <h3 class="text-xl font-semibold text-white mb-2">Secure Wallet Storage</h3>
-              <p class="text-gray-400">Military-grade encryption and multi-signature technology keep your assets safe.</p>
-            </div>
-            
-            <div class="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-xl p-6 hover:bg-slate-800/70 transition">
-              <div class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mb-4">
-                <lucide-icon [name]="trendingUp" class="w-6 h-6 text-green-400"></lucide-icon>
-              </div>
-              <h3 class="text-xl font-semibold text-white mb-2">Instant Transactions</h3>
-              <p class="text-gray-400">Send and receive crypto instantly with our optimized blockchain infrastructure.</p>
-            </div>
-            
-            <div class="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-xl p-6 hover:bg-slate-800/70 transition">
-              <div class="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4">
-                <lucide-icon [name]="trendingUp" class="w-6 h-6 text-purple-400"></lucide-icon>
-              </div>
-              <h3 class="text-xl font-semibold text-white mb-2">Portfolio Analytics</h3>
-              <p class="text-gray-400">Advanced analytics and insights to track your crypto performance.</p>
-            </div>
-            
-            <div class="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-xl p-6 hover:bg-slate-800/70 transition">
-              <div class="w-12 h-12 bg-orange-500/20 rounded-lg flex items-center justify-center mb-4">
-                <lucide-icon [name]="globe" class="w-6 h-6 text-orange-400"></lucide-icon>
-              </div>
-              <h3 class="text-xl font-semibold text-white mb-2">Multi-Chain Support</h3>
-              <p class="text-gray-400">Support for Bitcoin, Ethereum, Solana, and thousands of tokens.</p>
-            </div>
-          </div>
+      <section id="features" class="features container">
+        <div class="section-header animate-fade-in">
+          <h2 class="section-title">The Vault Experience</h2>
+          <p class="text-secondary">Engineered for security, designed for speed.</p>
         </div>
-      </section>
-
-      <!-- Market Preview -->
-      <section class="py-20 px-4 sm:px-6 lg:px-8 bg-slate-800/30">
-        <div class="max-w-7xl mx-auto">
-          <div class="text-center mb-16">
-            <h2 class="text-4xl font-bold text-white mb-4">Live Market Data</h2>
-            <p class="text-xl text-gray-300">Real-time prices and market insights</p>
+        
+        <div class="features-grid">
+          <div class="feature-card glass">
+            <div class="feature-icon">
+              <lucide-icon [name]="shield"></lucide-icon>
+            </div>
+            <h3 class="feature-title">Multi-Sig Security</h3>
+            <p class="feature-desc">Institutional-grade security with multi-signature technology and cold storage integration.</p>
           </div>
           
-          <div class="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-xl overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead class="bg-slate-900/50">
-                  <tr>
-                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Coin</th>
-                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Price</th>
-                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">24h Change</th>
-                    <th class="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Market Cap</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-700/50">
-                  <tr class="hover:bg-slate-700/30 transition">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <div class="flex items-center">
-                        <div class="w-8 h-8 bg-orange-500 rounded-full mr-3"></div>
-                        <span class="text-white font-medium">Bitcoin</span>
-                        <span class="text-gray-400 ml-2">BTC</span>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-white">$42,156.32</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <span class="text-green-400 flex items-center">
-                        <lucide-icon [name]="arrowUpRight" class="w-4 h-4 mr-1"></lucide-icon>
-                        +2.5%
-                      </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-gray-300">$823.5B</td>
-                  </tr>
-                  <tr class="hover:bg-slate-700/30 transition">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <div class="flex items-center">
-                        <div class="w-8 h-8 bg-blue-500 rounded-full mr-3"></div>
-                        <span class="text-white font-medium">Ethereum</span>
-                        <span class="text-gray-400 ml-2">ETH</span>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-white">$2,234.56</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <span class="text-red-400 flex items-center">
-                        <lucide-icon [name]="arrowDownRight" class="w-4 h-4 mr-1"></lucide-icon>
-                        -1.2%
-                      </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-gray-300">$268.2B</td>
-                  </tr>
-                </tbody>
-              </table>
+          <div class="feature-card glass">
+            <div class="feature-icon">
+              <lucide-icon [name]="trendingUp"></lucide-icon>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Security Section -->
-      <section id="security" class="py-20 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-7xl mx-auto">
-          <div class="text-center mb-16">
-            <h2 class="text-4xl font-bold text-white mb-4">Bank-Level Security</h2>
-            <p class="text-xl text-gray-300">Your assets are protected with industry-leading security measures</p>
+            <h3 class="feature-title">Real-time Analytics</h3>
+            <p class="feature-desc">Track your performance across multiple chains with advanced charting and insights.</p>
           </div>
           
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="text-center">
-              <div class="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <lucide-icon [name]="shield" class="w-8 h-8 text-blue-400"></lucide-icon>
-              </div>
-              <h3 class="text-xl font-semibold text-white mb-2">2FA Authentication</h3>
-              <p class="text-gray-400">Two-factor authentication keeps your account secure</p>
+          <div class="feature-card glass">
+            <div class="feature-icon">
+              <lucide-icon [name]="globe"></lucide-icon>
             </div>
-            
-            <div class="text-center">
-              <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <lucide-icon [name]="shield" class="w-8 h-8 text-green-400"></lucide-icon>
-              </div>
-              <h3 class="text-xl font-semibold text-white mb-2">Cold Storage</h3>
-              <p class="text-gray-400">Majority of assets stored in secure cold storage</p>
+            <h3 class="feature-title">Global Accessibility</h3>
+            <p class="feature-desc">Access your assets from anywhere in the world, with support for 150+ countries.</p>
+          </div>
+          
+          <div class="feature-card glass">
+            <div class="feature-icon">
+              <lucide-icon [name]="lock"></lucide-icon>
             </div>
-            
-            <div class="text-center">
-              <div class="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <lucide-icon [name]="shield" class="w-8 h-8 text-purple-400"></lucide-icon>
-              </div>
-              <h3 class="text-xl font-semibold text-white mb-2">Encryption</h3>
-              <p class="text-gray-400">End-to-end encryption for all transactions</p>
-            </div>
+            <h3 class="feature-title">Privacy Focused</h3>
+            <p class="feature-desc">Your keys, your crypto. We never store your private keys or personal data on our servers.</p>
           </div>
         </div>
       </section>
 
       <!-- Footer -->
-      <footer class="bg-slate-900 border-t border-slate-800 py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-7xl mx-auto">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div class="flex items-center space-x-2 mb-4">
-                <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <lucide-icon [name]="shield" class="w-5 h-5 text-white"></lucide-icon>
+      <footer class="footer">
+        <div class="container">
+          <div class="footer-grid">
+            <div class="footer-brand">
+              <div class="logo">
+                <div class="logo-icon">
+                  <lucide-icon [name]="shield"></lucide-icon>
                 </div>
-                <span class="text-xl font-bold text-white">CryptoVault Pro</span>
+                <span>CryptoVault Pro</span>
               </div>
-              <p class="text-gray-400">The most trusted crypto wallet platform</p>
+              <p class="footer-logo-desc">Building the future of decentralized finance since 2024.</p>
             </div>
             
-            <div>
-              <h4 class="text-white font-semibold mb-4">Product</h4>
-              <ul class="space-y-2 text-gray-400">
-                <li><a href="#" class="hover:text-white transition">Features</a></li>
-                <li><a href="#" class="hover:text-white transition">Security</a></li>
-                <li><a href="#" class="hover:text-white transition">Pricing</a></li>
+            <div class="footer-column">
+              <h4 class="footer-title">Platform</h4>
+              <ul class="footer-links">
+                <li><a href="#" class="footer-link">Exchange</a></li>
+                <li><a href="#" class="footer-link">Wallets</a></li>
+                <li><a href="#" class="footer-link">Staking</a></li>
               </ul>
             </div>
             
-            <div>
-              <h4 class="text-white font-semibold mb-4">Company</h4>
-              <ul class="space-y-2 text-gray-400">
-                <li><a href="#" class="hover:text-white transition">About</a></li>
-                <li><a href="#" class="hover:text-white transition">Blog</a></li>
-                <li><a href="#" class="hover:text-white transition">Careers</a></li>
+            <div class="footer-column">
+              <h4 class="footer-title">Company</h4>
+              <ul class="footer-links">
+                <li><a href="#" class="footer-link">About Us</a></li>
+                <li><a href="#" class="footer-link">Careers</a></li>
+                <li><a href="#" class="footer-link">Contact</a></li>
               </ul>
             </div>
             
-            <div>
-              <h4 class="text-white font-semibold mb-4">Legal</h4>
-              <ul class="space-y-2 text-gray-400">
-                <li><a href="#" class="hover:text-white transition">Privacy</a></li>
-                <li><a href="#" class="hover:text-white transition">Terms</a></li>
-                <li><a href="#" class="hover:text-white transition">Compliance</a></li>
+            <div class="footer-column">
+              <h4 class="footer-title">Legal</h4>
+              <ul class="footer-links">
+                <li><a href="#" class="footer-link">Privacy Policy</a></li>
+                <li><a href="#" class="footer-link">Terms of Service</a></li>
+                <li><a href="#" class="footer-link">Compliance</a></li>
               </ul>
             </div>
           </div>
-          
-          <div class="border-t border-slate-800 mt-8 pt-8 text-center text-gray-400">
+          <div class="footer-bottom">
             <p>&copy; 2026 CryptoVault Pro. All rights reserved.</p>
           </div>
         </div>
       </footer>
     </div>
   `,
-  styles: []
+  styleUrls: ['./public.component.scss']
 })
 export class PublicComponent {
   shield = Shield;
   trendingUp = TrendingUp;
   lock = Lock;
   globe = Globe;
-  chevronRight = ChevronRight;
   star = Star;
   arrowUpRight = ArrowUpRight;
   arrowDownRight = ArrowDownRight;
+
+  coins = [
+    { symbol: 'BTC', price: '$42,156.32', change: '+2.5%', up: true },
+    { symbol: 'ETH', price: '$2,234.56', change: '-1.2%', up: false },
+    { symbol: 'SOL', price: '$95.67', change: '+5.1%', up: true },
+    { symbol: 'BNB', price: '$312.45', change: '+0.8%', up: true },
+    { symbol: 'XRP', price: '$0.52', change: '-2.1%', up: false },
+    { symbol: 'ADA', price: '$0.48', change: '+1.5%', up: true },
+  ];
 }
