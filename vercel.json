@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "public": true,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/cryptovault-backend/src/app.ts"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/cryptovault-frontend/$1"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/cryptovault-frontend/index.html",
+      "permanent": false
+    }
+  ]
+}
