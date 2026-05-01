@@ -1,0 +1,8 @@
+{
+  "name": "cryptovault-app-root",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd cryptovault-frontend && npm install && npm run build",
+    "install": "cd cryptovault-frontend && npm install"
+  }
+}

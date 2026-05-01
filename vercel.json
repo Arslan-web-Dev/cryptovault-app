@@ -8,14 +8,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/cryptovault-frontend/$1"
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "/cryptovault-frontend/index.html",
-      "permanent": false
+      "destination": "/cryptovault-frontend/dist/cryptovault-frontend/browser/$1"
     }
   ]
 }
