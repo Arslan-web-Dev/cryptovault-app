@@ -33,6 +33,12 @@ export const routes: Routes = [
     title: 'Dashboard - CryptoVault Pro'
   },
   {
+    path: 'notifications',
+    loadComponent: () => import('./features/notifications/notifications.component').then(m => m.NotificationsComponent),
+    canActivate: [AuthGuard],
+    title: 'Notifications - CryptoVault Pro'
+  },
+  {
     path: 'wallet',
     loadChildren: () => import('./features/wallet/wallet.routes').then(m => m.WALLET_ROUTES),
     canActivate: [AuthGuard]

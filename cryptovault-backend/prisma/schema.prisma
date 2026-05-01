@@ -114,6 +114,7 @@ model User {
   kyc_level         KycLevel @default(LEVEL_0)
   status            UserStatus @default(ACTIVE)
   role              UserRole @default(USER)
+  is_approved       Boolean  @default(false)
   
   // Metadata
   last_login        DateTime?

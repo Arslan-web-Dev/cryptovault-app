@@ -9,6 +9,8 @@ export interface User {
   id: string;
   email: string;
   full_name: string;
+  role: 'USER' | 'ADMIN';
+  is_approved: boolean;
   is_2fa_enabled: boolean;
   kyc_level: string;
 }
@@ -23,6 +25,7 @@ export interface RegisterRequest {
   email: string;
   password: string;
   fullName: string;
+  role: 'USER' | 'ADMIN';
   phone?: string;
   country?: string;
 }
@@ -41,6 +44,7 @@ export class AuthService {
   private readonly API_URL = 'http://localhost:3000/api/auth';
   private readonly TOKEN_KEY = 'access_token';
   private readonly REFRESH_TOKEN_KEY = 'refresh_token';
+  private readonly USER_KEY = 'current_user';
   
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
@@ -61,12 +65,14 @@ export class AuthService {
   private initializeAuth() {
     if (this.isBrowser) {
       const token = this.getAccessToken();
-      if (token && !this.isTokenExpired(token)) {
-        const user = this.getUserFromToken(token);
-        if (user) {
-          this.currentUserSubject.next(user);
-          this.isAuthenticatedSubject.next(true);
-        }
+      const storedUser = localStorage.getItem(this.USER_KEY);
+      
+      if (token && !this.isTokenExpired(token) && storedUser) {
+        const user = JSON.parse(storedUser);
+        this.currentUserSubject.next(user);
+        this.isAuthenticatedSubject.next(true);
+      } else {
+        this.clearTokens();
       }
     }
   }
@@ -75,6 +81,7 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.API_URL}/login`, credentials).pipe(
       tap(response => {
         this.setTokens(response.access_token, response.refresh_token);
+        this.setUser(response.user);
         this.currentUserSubject.next(response.user);
         this.isAuthenticatedSubject.next(true);
       })
@@ -95,23 +102,6 @@ export class AuthService {
     this.currentUserSubject.next(null);
     this.isAuthenticatedSubject.next(false);
     this.router.navigate(['/auth/login']);
-  }
-
-  refreshToken(): Observable<{ access_token: string; refresh_token: string; expires_in: number }> {
-    const refreshToken = this.getRefreshToken();
-    if (!refreshToken) {
-      this.logout();
-      throw new Error('No refresh token available');
-    }
-
-    return this.http.post<{ access_token: string; refresh_token: string; expires_in: number }>(
-      `${this.API_URL}/refresh`, 
-      { refresh_token: refreshToken }
-    ).pipe(
-      tap(response => {
-        this.setTokens(response.access_token, response.refresh_token);
-      })
-    );
   }
 
   getAccessToken(): string | null {
@@ -135,10 +125,17 @@ export class AuthService {
     }
   }
 
+  private setUser(user: User): void {
+    if (this.isBrowser) {
+      localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    }
+  }
+
   private clearTokens(): void {
     if (this.isBrowser) {
       localStorage.removeItem(this.TOKEN_KEY);
       localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+      localStorage.removeItem(this.USER_KEY);
     }
   }
 
@@ -151,53 +148,11 @@ export class AuthService {
     }
   }
 
-  private getUserFromToken(token: string): User | null {
-    try {
-      const decoded: any = jwtDecode(token);
-      return {
-        id: decoded.userId,
-        email: '',
-        full_name: '',
-        is_2fa_enabled: false,
-        kyc_level: 'LEVEL_0'
-      };
-    } catch {
-      return null;
-    }
-  }
-
   getAuthHeaders(): HttpHeaders {
     const token = this.getAccessToken();
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
-    });
-  }
-
-  setup2FA(): Observable<{ secret: string; qrCode: string; manualEntryKey: string }> {
-    return this.http.post<{ secret: string; qrCode: string; manualEntryKey: string }>(
-      `${this.API_URL}/2fa/setup`,
-      {},
-      { headers: this.getAuthHeaders() }
-    );
-  }
-
-  verify2FA(token: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(
-      `${this.API_URL}/2fa/verify`,
-      { token },
-      { headers: this.getAuthHeaders() }
-    );
-  }
-
-  forgotPassword(email: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.API_URL}/forgot-password`, { email });
-  }
-
-  resetPassword(token: string, newPassword: string): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.API_URL}/reset-password`, {
-      token,
-      new_password: newPassword
     });
   }
 }

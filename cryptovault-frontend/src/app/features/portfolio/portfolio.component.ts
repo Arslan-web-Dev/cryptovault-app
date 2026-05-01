@@ -3,41 +3,15 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule, Shield, TrendingUp, Bell, Settings, LogOut, PieChart, BarChart2, Zap, Target, ArrowUpRight, ArrowDownRight } from 'lucide-angular';
 
+import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+
 @Component({
   selector: 'app-portfolio',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule],
+  imports: [CommonModule, RouterLink, LucideAngularModule, NavbarComponent],
   template: `
     <div class="dashboard-layout animate-fade-in">
-      <nav class="dashboard-nav glass">
-        <div class="container nav-container">
-          <div class="nav-brand">
-            <div class="brand-icon">
-              <lucide-icon [name]="shield"></lucide-icon>
-            </div>
-            <span>CryptoVault Pro</span>
-          </div>
-          
-          <div class="nav-menu">
-            <a routerLink="/dashboard" class="menu-item">Dashboard</a>
-            <a routerLink="/wallet" class="menu-item">Wallet</a>
-            <a routerLink="/market" class="menu-item">Market</a>
-            <a routerLink="/portfolio" class="menu-item active">Portfolio</a>
-          </div>
-          
-          <div class="nav-actions">
-            <button class="action-btn">
-              <lucide-icon [name]="bell" size="20"></lucide-icon>
-            </button>
-            <button class="action-btn">
-              <lucide-icon [name]="settings" size="20"></lucide-icon>
-            </button>
-            <button class="action-btn">
-              <lucide-icon [name]="logOut" size="20"></lucide-icon>
-            </button>
-          </div>
-        </div>
-      </nav>
+      <app-navbar></app-navbar>
 
       <main class="portfolio-layout container">
         <header class="portfolio-header">

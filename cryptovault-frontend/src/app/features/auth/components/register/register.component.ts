@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { LucideAngularModule, Eye, EyeOff, Shield, AlertCircle, Check } from 'lucide-angular';
+import { LucideAngularModule, Eye, EyeOff, Shield, AlertCircle, Check, User, ShieldCheck } from 'lucide-angular';
 import { AuthService, RegisterRequest } from '../../../../core/services/auth.service';
 
 @Component({
@@ -18,6 +18,25 @@ import { AuthService, RegisterRequest } from '../../../../core/services/auth.ser
           </div>
           <h1 class="auth-title">Create Account</h1>
           <p class="auth-subtitle">Join 10M+ users managing assets on CryptoVault</p>
+        </div>
+
+        <div class="role-selector mb-8">
+          <button 
+            type="button" 
+            class="role-btn" 
+            [class.active]="selectedRole === 'USER'"
+            (click)="setRole('USER')">
+            <lucide-icon [name]="userIcon" size="18"></lucide-icon>
+            <span>As User</span>
+          </button>
+          <button 
+            type="button" 
+            class="role-btn" 
+            [class.active]="selectedRole === 'ADMIN'"
+            (click)="setRole('ADMIN')">
+            <lucide-icon [name]="adminIcon" size="18"></lucide-icon>
+            <span>As Admin</span>
+          </button>
         </div>
 
         <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
@@ -101,7 +120,7 @@ import { AuthService, RegisterRequest } from '../../../../core/services/auth.ser
           }
 
           @if (successMessage) {
-            <div class="form-error mb-4 p-3 bg-success/10 rounded-lg border border-success/20 !text-success">
+            <div class="form-success mb-4 p-3 bg-success/10 rounded-lg border border-success/20 text-success flex items-center gap-2">
               <lucide-icon [name]="check" size="18"></lucide-icon>
               <span>{{ successMessage }}</span>
             </div>
@@ -112,7 +131,7 @@ import { AuthService, RegisterRequest } from '../../../../core/services/auth.ser
               <div class="spinner"></div>
               <span>Creating Account...</span>
             } @else {
-              <span>Create Account</span>
+              <span>Register as {{ selectedRole }}</span>
             }
           </button>
         </form>
@@ -131,6 +150,7 @@ export class RegisterComponent {
   errorMessage = '';
   successMessage = '';
   showPassword = false;
+  selectedRole: 'USER' | 'ADMIN' = 'USER';
   passwordStrengthPercentage = 0;
   passwordStrengthText = '';
   passwordStrengthBarColor = '';
@@ -140,6 +160,8 @@ export class RegisterComponent {
   eyeOff = EyeOff;
   alertCircle = AlertCircle;
   check = Check;
+  userIcon = User;
+  adminIcon = ShieldCheck;
 
   constructor(
     private fb: FormBuilder,
@@ -153,6 +175,10 @@ export class RegisterComponent {
       confirmPassword: ['', [Validators.required]],
       agreeTerms: [false, Validators.requiredTrue]
     }, { validators: this.passwordMatchValidator });
+  }
+
+  setRole(role: 'USER' | 'ADMIN'): void {
+    this.selectedRole = role;
   }
 
   passwordMatchValidator(form: FormGroup): { [key: string]: boolean } | null {
@@ -188,13 +214,22 @@ export class RegisterComponent {
   onSubmit(): void {
     if (this.registerForm.invalid) return;
     this.isLoading = true;
-    this.authService.register(this.registerForm.value).subscribe({
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    const registerData: any = {
+      ...this.registerForm.value,
+      role: this.selectedRole
+    };
+
+    this.authService.register(registerData).subscribe({
       next: (res) => {
         this.successMessage = res.message;
-        setTimeout(() => this.router.navigate(['/auth/login']), 2000);
+        this.isLoading = false;
+        setTimeout(() => this.router.navigate(['/auth/login']), 3000);
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Registration failed';
+        this.errorMessage = err.error?.message || 'Registration failed. Please try again.';
         this.isLoading = false;
       }
     });

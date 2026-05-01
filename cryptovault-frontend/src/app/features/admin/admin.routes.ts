@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 export const ADMIN_ROUTES: Routes = [
   {
     path: '',
-    loadComponent: () => import('./admin.component').then(m => m.AdminComponent),
-    title: 'Admin - CryptoVault Pro'
+    loadComponent: () => import('./admin-dashboard.component').then(m => m.AdminDashboardComponent),
+    title: 'Admin Dashboard - CryptoVault Pro'
   }
 ];

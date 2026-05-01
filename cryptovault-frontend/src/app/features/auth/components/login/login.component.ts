@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { LucideAngularModule, Eye, EyeOff, Shield, AlertCircle } from 'lucide-angular';
+import { LucideAngularModule, Eye, EyeOff, Shield, AlertCircle, User, ShieldCheck } from 'lucide-angular';
 import { AuthService, LoginRequest } from '../../../../core/services/auth.service';
 
 @Component({
@@ -17,7 +17,26 @@ import { AuthService, LoginRequest } from '../../../../core/services/auth.servic
             <lucide-icon [name]="shield" size="32"></lucide-icon>
           </div>
           <h1 class="auth-title">Welcome Back</h1>
-          <p class="auth-subtitle">Sign in to your vault to manage assets</p>
+          <p class="auth-subtitle">Choose your login type to access the vault</p>
+        </div>
+
+        <div class="role-selector mb-8">
+          <button 
+            type="button" 
+            class="role-btn" 
+            [class.active]="selectedRole === 'USER'"
+            (click)="setRole('USER')">
+            <lucide-icon [name]="userIcon" size="18"></lucide-icon>
+            <span>User Login</span>
+          </button>
+          <button 
+            type="button" 
+            class="role-btn" 
+            [class.active]="selectedRole === 'ADMIN'"
+            (click)="setRole('ADMIN')">
+            <lucide-icon [name]="adminIcon" size="18"></lucide-icon>
+            <span>Admin Login</span>
+          </button>
         </div>
 
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
@@ -78,9 +97,9 @@ import { AuthService, LoginRequest } from '../../../../core/services/auth.servic
           <button type="submit" class="btn-submit" [disabled]="loginForm.invalid || isLoading">
             @if (isLoading) {
               <div class="spinner"></div>
-              <span>Signing in...</span>
+              <span>Signing in as {{ selectedRole }}...</span>
             } @else {
-              <span>Sign In</span>
+              <span>Sign In as {{ selectedRole === 'USER' ? 'User' : 'Admin' }}</span>
             }
           </button>
         </form>
@@ -120,11 +139,14 @@ export class LoginComponent {
   isLoading = false;
   errorMessage = '';
   showPassword = false;
+  selectedRole: 'USER' | 'ADMIN' = 'USER';
   
   shield = Shield;
   eye = Eye;
   eyeOff = EyeOff;
   alertCircle = AlertCircle;
+  userIcon = User;
+  adminIcon = ShieldCheck;
 
   constructor(
     private fb: FormBuilder,
@@ -136,6 +158,10 @@ export class LoginComponent {
       password: ['', Validators.required],
       rememberMe: [false]
     });
+  }
+
+  setRole(role: 'USER' | 'ADMIN'): void {
+    this.selectedRole = role;
   }
 
   onSubmit(): void {
@@ -153,8 +179,19 @@ export class LoginComponent {
     };
 
     this.authService.login(loginData).subscribe({
-      next: () => {
-        this.router.navigate(['/dashboard']);
+      next: (response) => {
+        // Check if the actual user role matches selected role (optional security)
+        if (response.user.role !== this.selectedRole) {
+          this.errorMessage = `Invalid role. This account is registered as a ${response.user.role}.`;
+          this.isLoading = false;
+          return;
+        }
+        
+        if (this.selectedRole === 'ADMIN') {
+          this.router.navigate(['/admin']);
+        } else {
+          this.router.navigate(['/dashboard']);
+        }
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Login failed. Please try again.';

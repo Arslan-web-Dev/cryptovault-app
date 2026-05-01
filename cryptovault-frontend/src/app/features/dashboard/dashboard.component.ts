@@ -4,42 +4,15 @@ import { RouterLink, Router } from '@angular/router';
 import { LucideAngularModule, Wallet, TrendingUp, ArrowUpRight, ArrowDownRight, Bell, Settings, LogOut, Shield, DollarSign, Activity } from 'lucide-angular';
 import { AuthService } from '../../core/services/auth.service';
 
+import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule],
+  imports: [CommonModule, RouterLink, LucideAngularModule, NavbarComponent],
   template: `
     <div class="dashboard-layout animate-fade-in">
-      <nav class="dashboard-nav glass">
-        <div class="container nav-container">
-          <div class="nav-brand">
-            <div class="brand-icon">
-              <lucide-icon [name]="shield"></lucide-icon>
-            </div>
-            <span>CryptoVault Pro</span>
-          </div>
-          
-          <div class="nav-menu">
-            <a routerLink="/dashboard" class="menu-item active">Dashboard</a>
-            <a routerLink="/wallet" class="menu-item">Wallet</a>
-            <a routerLink="/market" class="menu-item">Market</a>
-            <a routerLink="/portfolio" class="menu-item">Portfolio</a>
-          </div>
-          
-          <div class="nav-actions">
-            <button class="action-btn">
-              <lucide-icon [name]="bell" size="20"></lucide-icon>
-              <span class="notification-dot"></span>
-            </button>
-            <button class="action-btn">
-              <lucide-icon [name]="settings" size="20"></lucide-icon>
-            </button>
-            <button class="action-btn" (click)="logout()">
-              <lucide-icon [name]="logOut" size="20"></lucide-icon>
-            </button>
-          </div>
-        </div>
-      </nav>
+      <app-navbar></app-navbar>
 
       <main class="dashboard-content container">
         <header class="welcome-section">
@@ -240,6 +213,9 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
+      if (user?.role === 'ADMIN') {
+        this.router.navigate(['/admin']);
+      }
     });
   }
 

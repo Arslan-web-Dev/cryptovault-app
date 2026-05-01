@@ -15,6 +15,7 @@ import userRoutes from './routes/user.routes';
 import adminRoutes from './routes/admin.routes';
 import stakingRoutes from './routes/staking.routes';
 import referralRoutes from './routes/referral.routes';
+import newsRoutes from './routes/news.routes';
 import { errorHandler } from './middleware/error.middleware';
 import { rateLimitMiddleware } from './middleware/rateLimit.middleware';
 
@@ -127,6 +128,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/staking', stakingRoutes);
 app.use('/api/referral', referralRoutes);
+app.use('/api/news', newsRoutes);
 
 // 404 handler
 app.use((req, res) => {
